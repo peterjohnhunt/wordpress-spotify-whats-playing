@@ -90,36 +90,35 @@ class Whats_Playing_Admin {
 		register_setting( 'whats_playing', 'whats_playing_settings' );
 
 		add_settings_section(
-			'whats_playing_settings_section',
+			'settings_section',
 			'API Credentials',
 			false,
 			'whats_playing'
 		);
 
 		add_settings_field(
-			'whats_playing_client_id',
+			'client_id',
 			'Client ID',
 			array($this, 'render_settings_client_id'),
 			'whats_playing',
-			'whats_playing_settings_section'
+			'settings_section'
 		);
 
 		add_settings_field(
-			'whats_playing_client_secret',
+			'client_secret',
 			'Client Secret',
 			array($this, 'render_settings_client_secret'),
 			'whats_playing',
-			'whats_playing_settings_section'
+			'settings_section'
 		);
 
-		$options = get_option( 'whats_playing_settings' );
-		if (isset($options['whats_playing_auth_code'])) {
+		if ( $this->spotify->is_authenticated() ) {
 			add_settings_field(
-				'whats_playing_auth_code',
-				'Authorization Code',
-				array($this, 'render_settings_auth_code'),
+				'refresh_token',
+				'Refresh Token',
+				array($this, 'render_settings_refresh_token'),
 				'whats_playing',
-				'whats_playing_settings_section'
+				'settings_section'
 			);
 		}
 	}
@@ -136,9 +135,9 @@ class Whats_Playing_Admin {
 		echo ob_get_clean();
 	}
 
-	public function render_settings_auth_code() {
+	public function render_settings_refresh_token() {
 		ob_start();
-		require_once plugin_dir_path( __FILE__ ) . 'partials/fields/auth-code.php';
+		require_once plugin_dir_path( __FILE__ ) . 'partials/fields/refresh-token.php';
 		echo ob_get_clean();
 	}
 
@@ -148,31 +147,21 @@ class Whats_Playing_Admin {
 	//∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴∵∴
 
 	public function on_settings_save() {
-		if (isset($_GET['settings-updated']) && ($options = get_option('whats_playing_settings'))) {
-			$client_id = isset($options['whats_playing_client_id']) ? $options['whats_playing_client_id'] : '';
+		if ( isset($_GET['settings-updated']) ) {
+			$this->spotify->authenticate();
+		}
 
-			if ($client_id) {
-				$this->spotify->authenticate($client_id);
-			}
+		if ( $this->spotify->is_authenticated() ) {
+			add_settings_error('whats_playing_settings','whats-up-authenticated','Successfully Authenticated!', 'updated');
+		} else {
+			add_settings_error('whats_playing_settings','whats-up-error','Not Authenticated!', 'error');
 		}
 	}
 
 	public function on_settings_authenticate() {
 		if( is_front_page() && is_user_logged_in() && current_user_can( 'manage_options' ) && isset($_GET[ 'code' ]) && $_GET[ 'code' ]){
-			$options       = get_option('whats_playing_settings');
-			$client_id     = isset($options['whats_playing_client_id']) ? $options['whats_playing_client_id'] : '';
-			$client_secret = isset($options['whats_playing_client_secret']) ? $options['whats_playing_client_secret'] : '';
-			$code          = isset($_GET[ 'code' ]) ? $_GET[ 'code' ] : '';
-
-			if ($client_id && $client_secret && $code) {
-				$access_token = $this->spotify->get_token($client_id, $client_secret, $code);
-				if ($access_token) {
-					$options['whats_playing_auth_code'] = $access_token;
-				} else {
-					unset($options['whats_playing_auth_code']);
-				}
-				update_option('whats_playing_settings', $options);
-			}
+			$code = isset($_GET[ 'code' ]) ? $_GET[ 'code' ] : '';
+			$authenticated = $this->spotify->save_tokens($code);
 			wp_safe_redirect(admin_url('admin.php?page=whats-playing'));
 			exit();
 		}

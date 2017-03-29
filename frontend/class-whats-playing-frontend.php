@@ -54,24 +54,10 @@ class Whats_Playing_Frontend {
 	//≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
 	public function render_whats_playing(){
-		$options = get_option( 'whats_playing_settings' );
-
-		if (isset($options['whats_playing_auth_code'])) {
-			$access_token = $options['whats_playing_auth_code'];
-			$this->spotify->set_token($access_token);
-
-			if ( $this->spotify->is_authenticated() ) {
-				$profile = $this->spotify->get_profile();
-				$playing = $this->spotify->get_playing_song();
-
-				if ($profile || $playing) {
-					require_once plugin_dir_path( __FILE__ ) . 'partials/whats-playing.php';
-				} else {
-					$options = get_option('whats_playing_settings');
-					unset($options['whats_playing_auth_code']);
-					update_option('whats_playing_settings', $options);
-				}
-			}
+		if ( $this->spotify->is_authenticated() ) {
+			$profile = $this->spotify->get_profile();
+			$playing = $this->spotify->get_playing_song();
+			require_once plugin_dir_path( __FILE__ ) . 'partials/whats-playing.php';
 		}
 	}
 }

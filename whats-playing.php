@@ -4,7 +4,7 @@
  * Plugin Name:       Whats Playing
  * Plugin URI:        http://github.com/peterjohnhunt/whats-playing
  * Description:       Whats Playing displays a bar of your current playing Spotify music
- * Version:           1.0.0
+ * Version:           1.0.1
  * Author:            PeterJohn Hunt
  * Author URI:        http://peterjohnhunt.com
  * Text Domain:       whats-playing-locale

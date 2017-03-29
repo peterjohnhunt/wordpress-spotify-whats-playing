@@ -9,7 +9,6 @@
 //     _Authentication
 //     _Token
 //     _Requests
-//       ∟sub
 //       ∟Handler
 //       ∟Endpoints
 //       ∟Data
@@ -27,7 +26,13 @@ class Spotify_API {
 
     protected $request_url;
 
+    protected $client_id;
+
+    protected $client_secret;
+
     protected $access_token;
+
+    protected $refresh_token;
 
 
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
@@ -35,9 +40,19 @@ class Spotify_API {
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
     public function __construct() {
-        $this->auth_url     = 'https://accounts.spotify.com/authorize';
-        $this->token_url    = 'https://accounts.spotify.com/api/token';
-        $this->request_url  = 'https://api.spotify.com/v1/';
+        $this->auth_url      = 'https://accounts.spotify.com/authorize';
+        $this->token_url     = 'https://accounts.spotify.com/api/token';
+        $this->request_url   = 'https://api.spotify.com/v1/';
+
+        $options = get_option('whats_playing_settings');
+
+        $this->client_id     = isset($options['client_id']) ? $options['client_id'] : '';
+        $this->client_secret = isset($options['client_secret']) ? $options['client_secret'] : '';
+        $this->refresh_token = isset($options['refresh_token']) ? $options['refresh_token'] : '';
+
+        if ( !$this->can_authenticate() ) {
+            $this->delete_tokens();
+        }
 	}
 
 
@@ -45,23 +60,29 @@ class Spotify_API {
     // _Authentication
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
-    public function is_authenticated(){
-        return ($this->access_token);
+    public function can_authenticate(){
+        return ($this->client_id && $this->client_secret);
     }
 
-    public function authenticate($client_id){
-        $args = array(
-            'response_type' => 'code',
-            'client_id'     => $client_id,
-            'scope'			=> urlencode('user-read-recently-played user-read-private user-read-email'),
-            'redirect_uri'  => home_url('/'),
-        );
+    public function is_authenticated(){
+        return ($this->client_id && $this->client_secret && $this->refresh_token);
+    }
 
-        $url = add_query_arg( $args, $this->auth_url );
+    public function authenticate(){
+        if ($this->can_authenticate()) {
+            $args = array(
+                'response_type' => 'code',
+                'client_id'     => $this->client_id,
+                'scope'			=> urlencode('user-read-recently-played user-read-private user-read-email'),
+                'redirect_uri'  => home_url('/'),
+            );
 
-        wp_redirect($url);
+            $url = add_query_arg( $args, $this->auth_url );
 
-        exit;
+            wp_redirect($url);
+
+            exit;
+        }
     }
 
 
@@ -69,30 +90,58 @@ class Spotify_API {
     // _Token
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
-    public function set_token($access_token){
-        $this->access_token = $access_token;
+    public function request_tokens($params){
+        $request = wp_remote_post( $this->token_url, array( 'headers' => array('Authorization' => 'Basic ' . base64_encode($this->client_id . ':' . $this->client_secret)), 'body' => $params ) );
+
+        if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) )  {
+            return;
+        }
+
+        $request_body = json_decode( wp_remote_retrieve_body($request) );
+
+        if (isset($request_body->refresh_token)) {
+            $this->refresh_token = $request_body->refresh_token;
+            $settings = get_option( 'whats_playing_settings' );
+            $settings['refresh_token'] = $this->refresh_token;
+            update_option('whats_playing_settings', $settings);
+        }
+        set_transient('whatsplaying::token', $request_body->access_token, $request_body->expires_in);
+
+        return ($request_body->access_token);
     }
 
-    public function get_token($client_id, $client_secret, $code){
-    	$params = array(
-    		'client_id'     => $client_id,
-    		'client_secret' => $client_secret,
-    		'grant_type'    => 'authorization_code',
-    		'code'          => $code,
-    		'redirect_uri'  => home_url('/'),
-    	);
+    public function save_tokens($code=false){
+        $params = array(
+            'grant_type'    => 'authorization_code',
+            'code'          => $code,
+            'redirect_uri'  => home_url('/'),
+        );
 
-    	$request = wp_remote_post( $this->token_url, array( 'body' => $params ) );
+        return $this->request_tokens($params);
+    }
 
-    	if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) )  {
-    		return;
-    	}
+    public function delete_tokens(){
+        $this->refresh_token = false;
+        delete_transient('whatsplaying::token');
+        $settings = get_option( 'whats_playing_settings' );
+        unset($settings['refresh_token']);
+        update_option('whats_playing_settings', $settings);
+    }
 
-    	$request_body = json_decode( wp_remote_retrieve_body($request) );
+    public function get_token(){
+        $token = get_transient('whatsplaying::token');
+        if ( $token !== false ) {
+            return $token;
+        } else {
+            $params = array(
+                'grant_type'    => 'refresh_token',
+                'refresh_token' => $this->refresh_token,
+            );
 
-    	if ( isset( $request_body->access_token ) ) {
-    		return $request_body->access_token;
-    	}
+            $this->request_tokens($params);
+
+            return $this->refresh_token;
+        }
     }
 
 
@@ -106,20 +155,23 @@ class Spotify_API {
     private function make_request($endpoint, $args=array(), $lifespan=DAY_IN_SECONDS){
         if ( $this->is_authenticated() ) {
 
+            $access_token = $this->get_token();
+
             $url = trailingslashit($this->request_url) . $endpoint;
 
             $url = add_query_arg($args, $url);
 
-    		$cache_key = "spotify::".$endpoint.'::'. md5( $url );
+    		$cache_key = "whatsplaying::".$endpoint.'::'. md5( $url );
 
     		$cached = get_transient( $cache_key );
 
     		if ( $cached !== false ) {
     			return $cached;
     		} else {
-    			$request = wp_remote_get($url, array( 'headers' => array('Authorization' => 'Bearer ' . $this->access_token)));
+    			$request = wp_remote_get($url, array( 'headers' => array('Authorization' => 'Bearer ' . $access_token)));
 
-    			if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) )  {
+    			if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) ) {
+                    $this->delete_tokens();
     				return;
     			}
 

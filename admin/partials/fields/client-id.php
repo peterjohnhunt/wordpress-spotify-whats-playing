@@ -1,5 +1,5 @@
 <?php
-    $id        = 'whats_playing_client_id';
+    $id        = 'client_id';
     $options   = get_option( 'whats_playing_settings' );
     $client_id = isset($options[$id]) ? $options[$id] : '';
 ?>

@@ -1,6 +1,6 @@
 # Whats Playing
 
-Whats Playing displays a bar of your current playing Spotify music
+Whats Playing is a Wordpress plugin that displays a bar of your current playing Spotify music
 
 ---
 

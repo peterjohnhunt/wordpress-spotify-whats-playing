@@ -14,7 +14,7 @@ class Whats_Playing {
 
 	public function __construct() {
 		$this->plugin_slug = 'whats-playing';
-		$this->version = '1.0.0';
+		$this->version = '1.0.1';
 		$this->loader = new Whats_Playing_Loader();
 
 		$this->define_admin_hooks();
