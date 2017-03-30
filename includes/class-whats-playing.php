@@ -32,6 +32,7 @@ class Whats_Playing {
 	private function define_frontend_hooks() {
 		$frontend = new Frontend\Whats_Playing_Frontend( $this->get_version() );
 		$this->loader->add_action( 'wp_enqueue_scripts', $frontend, 'enqueue_styles' );
+		$this->loader->add_action( 'wp_enqueue_scripts', $frontend, 'enqueue_scripts' );
 		$this->loader->add_action( 'wp_footer', $frontend, 'render_whats_playing' );
 	}
 
