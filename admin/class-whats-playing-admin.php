@@ -160,10 +160,12 @@ class Whats_Playing_Admin {
 
 	public function on_settings_authenticate() {
 		if( is_front_page() && is_user_logged_in() && current_user_can( 'manage_options' ) && isset($_GET[ 'code' ]) && $_GET[ 'code' ]){
-			$code = isset($_GET[ 'code' ]) ? $_GET[ 'code' ] : '';
+			$code = $_GET[ 'code' ];
 			$authenticated = $this->spotify->save_tokens($code);
-			wp_safe_redirect(admin_url('admin.php?page=whats-playing'));
-			exit();
+			if ($authenticated) {
+				wp_redirect(admin_url('admin.php?page=whats-playing'));
+				exit();
+			}
 		}
 	}
 }

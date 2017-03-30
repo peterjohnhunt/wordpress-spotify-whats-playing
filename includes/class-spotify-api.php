@@ -34,15 +34,18 @@ class Spotify_API {
 
     protected $refresh_token;
 
+    protected $redirect_uri;
+
 
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
     // _Setup
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
     public function __construct() {
-        $this->auth_url    = 'https://accounts.spotify.com/authorize';
-        $this->token_url   = 'https://accounts.spotify.com/api/token';
-        $this->request_url = 'https://api.spotify.com/v1/';
+        $this->auth_url     = 'https://accounts.spotify.com/authorize';
+        $this->token_url    = 'https://accounts.spotify.com/api/token';
+        $this->request_url  = 'https://api.spotify.com/v1/';
+        $this->redirect_uri = force_ssl_admin() ? home_url('/','https') : home_url('/','http');
 
         $options = get_option('whats_playing_settings');
 
@@ -74,7 +77,7 @@ class Spotify_API {
                 'response_type' => 'code',
                 'client_id'     => $this->client_id,
                 'scope'			=> urlencode('user-read-recently-played user-read-private user-read-email'),
-                'redirect_uri'  => home_url('/'),
+                'redirect_uri'  => $this->redirect_uri,
             );
 
             $url = add_query_arg( $args, $this->auth_url );
@@ -105,6 +108,7 @@ class Spotify_API {
             $settings['refresh_token'] = $this->refresh_token;
             update_option('whats_playing_settings', $settings);
         }
+
         set_transient('whatsplaying::token', $request_body->access_token, $request_body->expires_in);
 
         return ($request_body->access_token);
@@ -114,7 +118,7 @@ class Spotify_API {
         $params = array(
             'grant_type'    => 'authorization_code',
             'code'          => $code,
-            'redirect_uri'  => home_url('/'),
+            'redirect_uri'  => $this->redirect_uri,
         );
 
         return $this->request_tokens($params);
@@ -168,7 +172,7 @@ class Spotify_API {
     		if ( $cached !== false ) {
     			return $cached;
     		} else {
-    			$request = wp_remote_get($url, array( 'headers' => array('Authorization' => 'Bearer ' . $access_token)));
+    			$request = wp_remote_get($url, array('headers' => array('Authorization' => 'Bearer ' . $access_token)));
 
     			if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) ) {
                     $this->delete_tokens();

@@ -1,3 +1,6 @@
+## [v1.1.1](https://github.com/peterjohnhunt/whats-playing/compare/v1.1.0...v1.1.1) | 2017-03-30
+- Fixed SSL Redirect URI bug
+- Added Authentication Conditional
 ## [v1.1.0](https://github.com/peterjohnhunt/whats-playing/compare/v1.0.1...v1.1.0) | 2017-03-29
 - Added Front End Styling
 - Added Front End Javascript
