@@ -1,4 +1,4 @@
-<form action='options.php' method='post'>
+<form id="whats-playing" action='options.php' method='post'>
 
 	<h2>Whats Playing</h2>
 

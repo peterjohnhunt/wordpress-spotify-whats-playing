@@ -44,7 +44,7 @@ class Whats_Playing_Admin {
 	public function enqueue_styles() {
 		wp_enqueue_style(
 			'whats-playing-admin',
-			plugin_dir_url( __FILE__ ) . 'css/whats-playing-admin.css',
+			plugin_dir_url( dirname(__FILE__) ) . 'assets/css/whats-playing-admin.min.css',
 			array(),
 			$this->version,
 			FALSE
@@ -61,7 +61,7 @@ class Whats_Playing_Admin {
 
 	public function add_plugin_page() {
 		ob_start();
-		require_once plugin_dir_path( __FILE__ ) . 'images/spotify.svg';
+		require_once plugin_dir_path( dirname(__FILE__) ) . 'assets/images/spotify.svg';
 		$icon = ob_get_clean();
 		$hook = add_menu_page(
 			'Whats Playing',

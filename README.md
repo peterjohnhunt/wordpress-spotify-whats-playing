@@ -16,3 +16,7 @@ For any issues, additions or bugs, feel free to [open an issue](https://github.c
 
 ## Contributors
 * Originally created by [PeterJohn Hunt](https://peterjohnhunt.com)
+
+### TODO:
+* AJAX
+* Options Helpers

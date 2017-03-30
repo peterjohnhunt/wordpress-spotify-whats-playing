@@ -40,11 +40,28 @@ class Whats_Playing_Frontend {
 
 	public function enqueue_styles(){
 		wp_enqueue_style(
-			'whats-playing-frontend',
-			plugin_dir_url( __FILE__ ) . 'css/whats-playing-frontend.css',
+			'whats-playing-open-sans',
+			'https://fonts.googleapis.com/css?family=Open+Sans:400,700',
 			array(),
 			$this->version,
 			FALSE
+		);
+		wp_enqueue_style(
+			'whats-playing-frontend-css',
+			plugin_dir_url( dirname(__FILE__) ) . 'assets/css/whats-playing-frontend.min.css',
+			array(),
+			$this->version,
+			FALSE
+		);
+	}
+
+	public function enqueue_scripts(){
+		wp_enqueue_script(
+			'whats-playing-frontend-js',
+			plugin_dir_url( dirname(__FILE__) ) . 'assets/js/whats-playing-frontend.min.js',
+			array('jquery'),
+			$this->version,
+			TRUE
 		);
 	}
 

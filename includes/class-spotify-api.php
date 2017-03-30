@@ -40,9 +40,9 @@ class Spotify_API {
     //≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡≡
 
     public function __construct() {
-        $this->auth_url      = 'https://accounts.spotify.com/authorize';
-        $this->token_url     = 'https://accounts.spotify.com/api/token';
-        $this->request_url   = 'https://api.spotify.com/v1/';
+        $this->auth_url    = 'https://accounts.spotify.com/authorize';
+        $this->token_url   = 'https://accounts.spotify.com/api/token';
+        $this->request_url = 'https://api.spotify.com/v1/';
 
         $options = get_option('whats_playing_settings');
 
@@ -169,6 +169,36 @@ class Spotify_API {
     			return $cached;
     		} else {
     			$request = wp_remote_get($url, array( 'headers' => array('Authorization' => 'Bearer ' . $access_token)));
+
+    			if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) ) {
+                    $this->delete_tokens();
+    				return;
+    			}
+
+    			$request_body = json_decode( wp_remote_retrieve_body($request) );
+
+    			if ( isset( $request_body ) ) {
+    				$data = $request_body;
+    				set_transient( $cache_key, $data, $lifespan );
+    				return $data;
+    			}
+    		}
+        }
+    }
+
+    private function get_details($href, $lifespan=DAY_IN_SECONDS){
+        if ( $this->is_authenticated() ) {
+
+            $access_token = $this->get_token();
+
+    		$cache_key = "whatsplaying::details::" . md5( $href );
+
+    		$cached = get_transient( $cache_key );
+
+    		if ( $cached !== false ) {
+    			return $cached;
+    		} else {
+    			$request = wp_remote_get($href, array( 'headers' => array('Authorization' => 'Bearer ' . $access_token)));
 
     			if ( is_wp_error( $request ) || ( $request[ 'response' ][ 'code' ] !== 200 ) ) {
                     $this->delete_tokens();
