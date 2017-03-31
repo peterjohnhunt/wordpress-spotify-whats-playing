@@ -1,3 +1,10 @@
+## [v1.2.0](https://github.com/peterjohnhunt/whats-playing/compare/v1.1.1...v1.2.0) | 2017-03-31
+- Updated Readme
+- Added AJAX
+- Added Lazy Load
+- Added Auto Refresh
+- Styling Improvements
+- Load Conditionals
 ## [v1.1.1](https://github.com/peterjohnhunt/whats-playing/compare/v1.1.0...v1.1.1) | 2017-03-30
 - Fixed SSL Redirect URI bug
 - Added Authentication Conditional

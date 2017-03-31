@@ -14,7 +14,7 @@ class Whats_Playing {
 
 	public function __construct() {
 		$this->plugin_slug = 'whats-playing';
-		$this->version = '1.0.1';
+		$this->version = '1.2.0';
 		$this->loader = new Whats_Playing_Loader();
 
 		$this->define_admin_hooks();
@@ -34,6 +34,8 @@ class Whats_Playing {
 		$this->loader->add_action( 'wp_enqueue_scripts', $frontend, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $frontend, 'enqueue_scripts' );
 		$this->loader->add_action( 'wp_footer', $frontend, 'render_whats_playing' );
+		$this->loader->add_action( 'wp_ajax_get_whats_playing', $frontend, 'get_whats_playing' );
+		$this->loader->add_action( 'wp_ajax_nopriv_get_whats_playing', $frontend, 'get_whats_playing' );
 	}
 
 	public function run() {

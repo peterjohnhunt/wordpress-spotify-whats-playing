@@ -10,45 +10,46 @@
     left:0;
     right:0;
     background-color:#1ed760;
-    padding:6px 10px;
+    padding:6px 15px;
     @include prefix(transition, all 200ms cubic-bezier(1.000, 0.005, 0.535, 1.470));
 
-    &:after{
-        content: "";
-        display: table;
-        clear: both;
-    }
+	&.loaded{
 
-    &.open{
-		box-shadow:0 0 5px 2px rgba(0,0,0,0.3);
-        bottom:0;
+		&:not(.open){
+	        &:hover{
+	            bottom:-45px;
+	        }
 
-        &:hover{
-            .bubbles{
-                &:before{
-                    @include prefix(transform, scale(1));
-                }
-                span{
-                    @include prefix(transform, scaleY(1));
-                }
-            }
-        }
-        .bubbles{
-            &:before{
-                @include prefix(transform, scale(0));
-            }
+			.bubbles{
+				@include prefix(transform, scaleY(1) skewX(0));
+			}
+	    }
 
-            span{
-                @include prefix(transform, scaleY(0));
-            }
-        }
-    }
+		&.open{
+			box-shadow:0 0 5px 2px rgba(0,0,0,0.3);
+			bottom:0;
 
-    &:not(.open){
-        &:hover{
-            bottom:-45px;
-        }
-    }
+			&:hover{
+				.bubbles{
+					@include prefix(transform, scaleY(1) skewX(0));
+				}
+			}
+
+			.bubbles{
+				@include prefix(transform, scaleY(0) skewX(20deg));
+			}
+		}
+	}
+
+	.wrapper{
+		height:40px;
+
+		&:after{
+	        content: "";
+	        display: table;
+	        clear: both;
+	    }
+	}
 
     .bubbles{
         position:absolute;
@@ -57,6 +58,11 @@
         width:200px;
         height:45px;
         cursor:pointer;
+
+		@include prefix(transform-origin, 50% 100%);
+		@include prefix(transition, all 200ms cubic-bezier(1.000, 0.005, 0.535, 1));
+		@include prefix(timing-function, cubic-bezier(1.000, 0.005, 0.535, 1.470));
+		@include prefix(transform, scaleY(0) skewX(20deg));
 
         &:before,
         span:before,
@@ -76,8 +82,6 @@
             height:15px;
             width:15px;
             margin-top:-10px;
-            @include prefix(transition, all 200ms cubic-bezier(1.000, 0.005, 0.535, 1.470));
-            @include prefix(transition-timing-function, cubic-bezier(1.000, 0.005, 0.535, 1.470));
         }
 
         span{
@@ -85,9 +89,6 @@
             height:100%;
             overflow:hidden;
             bottom:0;
-            @include prefix(transform-origin, 50% 100%);
-            @include prefix(transition, all 200ms cubic-bezier(1.000, 0.005, 0.535, 1));
-            @include prefix(timing-function, cubic-bezier(1.000, 0.005, 0.535, 1.470));
 
             &:before{
                 top:5px;
@@ -242,9 +243,11 @@
 
     .bars{
         position:relative;
-        width:40px;
-        height:40px;
-        padding:10px;
+        width:20px;
+        height:25px;
+		margin:10px 0 5px;
+		padding-bottom:3px;
+		border-bottom:2px solid #ffffff;
         box-sizing:border-box;
         float:right;
 

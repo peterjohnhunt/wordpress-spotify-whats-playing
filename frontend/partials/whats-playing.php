@@ -1,20 +1,9 @@
-<?php
-    $classes = array();
-    if ($profile) {
-        $classes[] = 'has-profile';
-    }
-    if ($playing) {
-        $classes[] = 'is-playing';
-    }
-    $class = !empty($classes) ? ' class="'.implode($classes,' ').'"' : '';
-?>
-<aside id="whats-playing"<?php echo $class; ?>>
-    <div class="bubbles"><span></span><span></span></div>
+<div class="wrapper">
     <?php if ($profile): ?>
         <?php
-            $user_name = $profile->display_name ? $profile->display_name : $profile->id;
-            $user_href = $profile->uri ? ' href="'.$profile->uri.'" target="_blank"' : '';
-            $user_pic  = !empty($profile->images) ? ' style="background-image:url('.$profile->images[0]->url.');"' : '';
+        $user_name = $profile->display_name ? $profile->display_name : $profile->id;
+        $user_href = $profile->uri ? ' href="'.$profile->uri.'" target="_blank"' : '';
+        $user_pic  = !empty($profile->images) ? ' style="background-image:url('.$profile->images[0]->url.');"' : '';
         ?>
         <a class="profile"<?php echo $user_href; ?><?php echo $user_pic; ?>>
             <?php echo substr($user_name, 0, 1); ?>
@@ -22,13 +11,13 @@
     <?php endif; ?>
     <?php if ($playing): ?>
         <?php
-            $song_name = $playing->track->name;
-            $song_href = $playing->track->uri ? ' href="'.$playing->track->uri.'" target="_blank"' : '';
-            $artist = !empty($playing->track->artists) ? $playing->track->artists[0] : false;
-            $artist_name = $artist ? $artist->name : '';
-            $artist_href = $artist ? ' href="'.$artist->uri.'" target="_blank"' : '';
-            $playlist = $playing->context->type;
-            $playlist_href = $playing->context->uri ? ' href="'.$playing->context->uri.'" target="_blank"' : '';
+        $song_name = $playing->track->name;
+        $song_href = $playing->track->uri ? ' href="'.$playing->track->uri.'" target="_blank"' : '';
+        $artist = !empty($playing->track->artists) ? $playing->track->artists[0] : false;
+        $artist_name = $artist ? $artist->name : '';
+        $artist_href = $artist ? ' href="'.$artist->uri.'" target="_blank"' : '';
+        $playlist = $playing->context->type;
+        $playlist_href = $playing->context->uri ? ' href="'.$playing->context->uri.'" target="_blank"' : '';
         ?>
         <div class="track">
             <a class="song"<?php echo $song_href; ?>>
@@ -53,4 +42,4 @@
             Follow Me on Spotify!
         </a>
     <?php endif; ?>
-</aside>
+</div>

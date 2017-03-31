@@ -18,5 +18,4 @@ For any issues, additions or bugs, feel free to [open an issue](https://github.c
 * Originally created by [PeterJohn Hunt](https://peterjohnhunt.com)
 
 ### TODO:
-* AJAX
 * Options Helpers
